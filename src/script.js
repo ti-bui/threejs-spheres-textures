@@ -1,17 +1,42 @@
 import * as THREE from "three";
-import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 
 THREE.ColorManagement.enabled = false;
 
 const canvas = document.querySelector("canvas.webgl");
 const scene = new THREE.Scene();
 
-//** OBJECTS */
+//** TEXTURES */
+const textureLoader = new THREE.TextureLoader();
+const matcap3Texture = textureLoader.load("/textures/matcaps/3.png");
 
-const material = new THREE.MeshBasicMaterial({ color: "red" });
-const mesh = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), material);
+//** MATERIALS */
 
-scene.add(mesh);
+const sphere1Material = new THREE.MeshMatcapMaterial();
+sphere1Material.matcap = matcap3Texture;
+sphere1Material.opacity = 0.7;
+
+const sphere2Material = new THREE.MeshBasicMaterial();
+sphere2Material.color = new THREE.Color("rgb(194, 214, 255)");
+sphere2Material.transparent = true;
+sphere2Material.opacity = 0.2;
+sphere2Material.wireframe = true;
+
+//** OBJECTS - SPHERES */
+
+const sphere1 = new THREE.Mesh(
+  new THREE.SphereGeometry(0.5, 16, 16),
+  sphere1Material
+);
+
+const sphere2 = new THREE.Mesh(
+  new THREE.SphereGeometry(0.3, 16, 16),
+  sphere2Material
+);
+sphere2.scale.set(0.5, 20, 20);
+
+scene.add(sphere1, sphere2);
+
+//** SIZE */
 
 const sizes = {
   width: window.innerWidth,
@@ -49,14 +74,9 @@ const camera = new THREE.PerspectiveCamera(
   0.1,
   100
 );
+
 camera.position.z = 3;
-
 scene.add(camera);
-
-//** CONTROLS */
-
-const controls = new OrbitControls(camera, canvas);
-controls.enableDamping = true;
 
 //** RENDERER */
 
@@ -73,7 +93,8 @@ const clock = new THREE.Clock();
 const tick = () => {
   const elapsedTime = clock.getElapsedTime();
 
-  controls.update();
+  sphere1.rotation.x = elapsedTime * 2;
+  sphere2.position.x = Math.cos(elapsedTime) * Math.PI * 0.5;
 
   renderer.render(scene, camera);
 
